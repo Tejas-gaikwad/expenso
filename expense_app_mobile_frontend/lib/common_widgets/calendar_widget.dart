@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class CalendarWidget extends StatelessWidget {
-  const CalendarWidget({super.key});
+  final void Function(DateRangePickerSelectionChangedArgs)? onDateSelected;
+  const CalendarWidget({super.key, this.onDateSelected});
 
   @override
   Widget build(BuildContext context) {
     return SfDateRangePicker(
-      onSelectionChanged: (dateRangePickerSelectionChangedArgs) {},
+      backgroundColor: Colors.transparent,
+      onSelectionChanged: onDateSelected,
       selectionMode: DateRangePickerSelectionMode.single,
-      initialSelectedRange: PickerDateRange(
-          DateTime.now().subtract(const Duration(days: 4)),
-          DateTime.now().add(const Duration(days: 3))),
+      initialSelectedDate: DateTime.now(),
+      allowViewNavigation: true,
     );
   }
 }
