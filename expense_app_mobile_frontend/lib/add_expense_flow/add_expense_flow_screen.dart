@@ -3,8 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:simple_animations/simple_animations.dart';
 
 import '../common_widgets/calendar_widget.dart';
+import '../common_widgets/prev_widget.dart';
 import '../common_widgets/textfield_widget.dart';
+import '../model/my_expense_model.dart';
+import '../services/add_flow_services.dart';
 import '../utils/colors.dart';
+import 'add_expense_button_widget.dart';
 
 class AddExpenseFlowScreen extends StatefulWidget {
   const AddExpenseFlowScreen({super.key});
@@ -22,18 +26,22 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
             duration: const Duration(milliseconds: 750), curve: Curves.easeOut);
 
   late Animation<double> size;
-  int? selectedExpenseType = -1;
+   int? selectedExpenseType;
   double amount = -1; // 0=expense 1=income 2 =loan/debit
   late TextEditingController amountController;
   late TextEditingController _noteController;
-  DateTime? selectedDateFromCalendar;
+  late DateTime selectedDateFromCalendar;
   TimeOfDay? selectedTime;
   int part = 0;
-  int? selectedCategory;
+  String? selectedCategory;
+  MyExpenseModel? expenseModel;
+  late AddFlowServices addExpenseService;
 
   @override
   void initState() {
     super.initState();
+    addExpenseService = AddFlowServices();
+    selectedDateFromCalendar = DateTime.now();
     size = Tween(begin: -350.0, end: 0.0).animate(controller);
     controller.play();
     amountController = TextEditingController();
@@ -61,6 +69,7 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: white),
@@ -110,30 +119,25 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 1,
-            child: Text(
-              "$label ",
-              style: TextStyle(
-                fontSize: 14,
-                color: black,
-              ),
+          Text(
+            "$label ",
+            style: const TextStyle(
+              fontSize: 12,
+              color: black,
             ),
           ),
           const SizedBox(width: 15),
-          Expanded(
-            flex: 3,
-            child: Text(
-              userInput,
-              style: TextStyle(
-                  fontSize: userInputFontSize ?? 14,
-                  color: primaryColor,
-                  fontWeight: FontWeight.bold),
-            ),
+          Text(
+            userInput,
+            maxLines: 1,
+            style: TextStyle(
+                fontSize: userInputFontSize ?? 20,
+                color: primaryColor,
+                fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -146,7 +150,14 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        PrevWidget(
+          onTap: () {
+            setState(() {
+              part = 5;
+            });
+          },
+        ),
+        const Text(
           "Summary",
           style: TextStyle(
             color: black,
@@ -159,15 +170,16 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
         rowOfLabelAndText(
             label: "Amount",
             userInput: amountController.text,
-            userInputFontSize: 20),
+            userInputFontSize: 50),
         rowOfLabelAndText(
           label: "Date",
+          userInputFontSize: 20,
           userInput: DateFormat("dd MMM yyyy, hh:MM a")
               .format(
                 DateTime(
-                  selectedDateFromCalendar?.year ?? 0,
-                  selectedDateFromCalendar?.month ?? 0,
-                  selectedDateFromCalendar?.day ?? 0,
+                  selectedDateFromCalendar.year,
+                  selectedDateFromCalendar.month,
+                  selectedDateFromCalendar.day,
                   selectedTime?.hour ?? 0,
                   selectedTime?.minute ?? 0,
                 ),
@@ -175,46 +187,68 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
               .toString(),
         ),
         rowOfLabelAndText(
-            label: "Category", userInput: selectedCategory.toString()),
+            userInputFontSize: 20,
+            label: "Category",
+            userInput: selectedCategory.toString()),
         rowOfLabelAndText(
-            label: "Account", userInput: selectedAccount ?? "Not Available"),
-        rowOfLabelAndText(label: "Note", userInput: _noteController.text),
+            userInputFontSize: 20,
+            label: "Account",
+            userInput: selectAccountType ?? "Not Available"),
+        rowOfLabelAndText(
+            userInputFontSize: 20,
+            label: "Note",
+            userInput: _noteController.text),
 
         const SizedBox(height: 30),
-        InkWell(
-          onTap: () {
-            // TODO add _noteController text to notes of the expense
-            setState(() {
-              part = 6;
-            });
-          },
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: primaryColor,
-              border: Border.all(color: primaryColor),
-            ),
-            child: Text(
-              "ADD EXPENSE",
-              style: TextStyle(
-                color: white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+
+        AddExpenseButtonWidget(
+          expenseSummary: expenseModel,
         ),
+
+        // InkWell(
+        //   onTap: () {
+        //     // TODO navigate to add expense success page
+        //     setState(() {
+        //       part = 6;
+        //     });
+        //   },
+        //   child: Container(
+        //     alignment: Alignment.center,
+        //     padding: const EdgeInsets.symmetric(vertical: 15),
+        //     decoration: BoxDecoration(
+        //       borderRadius: BorderRadius.circular(8),
+        //       color: primaryColor,
+        //       border: Border.all(color: primaryColor),
+        //     ),
+        //     child: const Text(
+        //       "ADD EXPENSE",
+        //       style: TextStyle(
+        //         color: white,
+        //         fontWeight: FontWeight.bold,
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
+
+  String? selectAccountType;
+  List<String> accountList  =["UPI", "Cards", "Cash", "NetBanking", ];
 
   Widget selectExpenseWay() {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          PrevWidget(
+            onTap: () {
+              setState(() {
+                part = 4;
+              });
+            },
+          ),
+          const Text(
             "Select Account",
             style: TextStyle(
               color: black,
@@ -227,19 +261,19 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
           SizedBox(
             child: GridView.builder(
               shrinkWrap: true,
-              itemCount: 5,
+              itemCount: accountList.length,
               physics: const AlwaysScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
-                childAspectRatio: 5,
+                childAspectRatio: 4,
                 mainAxisSpacing: 10,
               ),
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
                     setState(() {
-                      selectedCategory = index;
+                      selectAccountType = accountList[index];
                     });
                   },
                   child: Container(
@@ -247,14 +281,14 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: selectedCategory != index ? white : white,
+                        color: selectAccountType != accountList[index] ? Colors.grey : white,
                       ),
-                      color: selectedCategory == index ? primaryColor : white,
+                      color: selectAccountType == accountList[index] ? primaryColor : white,
                     ),
                     child: Text(
-                      "UPI / Cash / Card",
+                      accountList[index],
                       style: TextStyle(
-                        color: selectedCategory == index ? white : black,
+                        color: selectAccountType == accountList[index] ? white : black,
                       ),
                     ),
                   ),
@@ -268,7 +302,15 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
               Expanded(
                 child: InkWell(
                   onTap: () {
-                    // TODO add _noteController text to notes of the expense
+                    expenseModel =  addExpenseService.addExpense(
+                      expenseType: selectedExpenseType ?? -1,
+                      amount: amountController.text,
+                      accountType: selectAccountType,
+                      category: selectedCategory,
+                      dateTime: userSelectedDateAndTime,
+                      note: _noteController.text,
+
+                    );
                     setState(() {
                       part = 6;
                     });
@@ -318,12 +360,50 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
     );
   }
 
+    final  List<String> expenseCategories = [
+  'Groceries',
+  'Restaurants',
+  'Fuel',
+  'Public Transport',
+  'Rent/Mortgage',
+  'Utilities',
+  'Internet',
+  'Medical Bills',
+  'Pharmacy',
+  'Gym/Fitness',
+  'Movies',
+  'Concerts',
+  'Subscriptions',
+  'Clothing',
+  'Haircuts/Salons',
+  'Books',
+  'Tuition Fees',
+  'Flights',
+  'Hotels',
+  'Investments',
+  'Savings',
+  'Gifts',
+  'Charitable Donations',
+  'Childcare',
+  'Pet Care',
+  'Other/Uncategorized',
+  'Fees & Charges',
+];
+
+
   Widget addCategory() {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          PrevWidget(
+            onTap: () {
+              setState(() {
+                part = 3;
+              });
+            },
+          ),
+          const Text(
             "Select Category",
             style: TextStyle(
               color: black,
@@ -337,19 +417,19 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
             height: MediaQuery.of(context).size.height / 3,
             child: GridView.builder(
               shrinkWrap: true,
-              itemCount: 16,
+              itemCount: expenseCategories.length,
               physics: const AlwaysScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
-                childAspectRatio: 5,
+                childAspectRatio: 4,
                 mainAxisSpacing: 10,
               ),
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
                     setState(() {
-                      selectedCategory = index;
+                      selectedCategory = expenseCategories[index];
                     });
                   },
                   child: Container(
@@ -357,14 +437,14 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: selectedCategory != index ? white : white,
+                        color: selectedCategory == expenseCategories[index] ? Colors.grey : white,
                       ),
-                      color: selectedCategory == index ? primaryColor : white,
+                      color:selectedCategory == expenseCategories[index]  ? primaryColor : white,
                     ),
                     child: Text(
-                      "Category ",
+                      expenseCategories[index],
                       style: TextStyle(
-                        color: selectedCategory == index ? white : black,
+                        color:selectedCategory == expenseCategories[index]  ? white : black,
                       ),
                     ),
                   ),
@@ -377,8 +457,6 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
               ? const SizedBox()
               : InkWell(
                   onTap: () async {
-                    await Future.delayed(const Duration(seconds: 1));
-
                     setState(() {
                       part = 5;
                     });
@@ -409,7 +487,14 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        PrevWidget(
+          onTap: () {
+            setState(() {
+              part = 2;
+            });
+          },
+        ),
+        const Text(
           "Add Note",
           style: TextStyle(
             color: black,
@@ -438,7 +523,6 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
             Expanded(
               child: InkWell(
                 onTap: () {
-                  // TODO add _noteController text to notes of the expense
                   setState(() {
                     part = 4;
                   });
@@ -492,7 +576,14 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
+        PrevWidget(
+          onTap: () {
+            setState(() {
+              part = 1;
+            });
+          },
+        ),
+        const Text(
           "Select Date and Time",
           style: TextStyle(
             color: black,
@@ -505,17 +596,23 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
         const SizedBox(height: 30),
         selectTimeWidget(),
         const SizedBox(height: 30),
-        (selectedDateFromCalendar != null && selectedTime != null)
-            ? nextButtonWidget()
-            : const SizedBox(),
+        (selectedTime != null) ? nextButtonWidget() : const SizedBox(),
       ],
     );
   }
 
+  DateTime? userSelectedDateAndTime;
+
   Widget nextButtonWidget() {
     return InkWell(
       onTap: () async {
-        await Future.delayed(const Duration(seconds: 1));
+        userSelectedDateAndTime = DateTime(
+          selectedDateFromCalendar.year,
+          selectedDateFromCalendar.month,
+          selectedDateFromCalendar.day,
+          selectedTime?.hour ?? 0,
+          selectedTime?.minute ?? 0,
+        );
 
         setState(() {
           part = 3;
@@ -587,7 +684,7 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
+        const Text(
           "Select Type",
           style: TextStyle(
             color: black,
@@ -644,9 +741,6 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
       onTap: () async {
         setState(() {
           selectedExpenseType = expenseType;
-        });
-        await Future.delayed(const Duration(seconds: 1));
-        setState(() {
           part = 1;
         });
 
@@ -688,7 +782,14 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
+        PrevWidget(
+          onTap: () {
+            setState(() {
+              part = 0;
+            });
+          },
+        ),
+        const Text(
           "Enter Amount",
           style: TextStyle(
             color: black,
@@ -698,21 +799,22 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
         ),
         const SizedBox(height: 20),
         ConstantTextFieldWidget(
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 50,
+          ),
+          borderColor: Colors.transparent,
+          borderRadius: 0,
           controller: controller,
           keyboardType: TextInputType.number,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 40),
         InkWell(
           onTap: () async {
-            // Navigator.push(context, MaterialPageRoute(builder: (context) {
-            //   return
-            // },));
-
             if (amountController.text.isNotEmpty) {
               setState(() {
                 amount = double.parse(amountController.text);
               });
-              await Future.delayed(const Duration(seconds: 2));
               setState(() {
                 part = 2;
               });
