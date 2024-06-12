@@ -5,11 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simple_animations/simple_animations.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-
 import 'add_expense_flow/add_expense_flow_screen.dart';
-import 'home_page_animated_builder.dart';
 import 'utils/colors.dart';
 
 class Home extends StatefulWidget {
@@ -141,13 +138,11 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
                               duration: const Duration(milliseconds: 400),
                               curve: Curves.easeIn,
                             horizontalOffset: -30.0,
-                              child: Expanded(
-                                child:  expenseAndIncomeWidget(
-                                  rotation: 3,
-                                  type: 1,
-                                  amount: totalIncome,
-                                  label: "Total Income"
-                                )    
+                              child: expenseAndIncomeWidget(
+                                rotation: 3,
+                                type: 1,
+                                amount: totalIncome,
+                                label: "Total Income"
                               ),
                             ),
                           ),
@@ -158,14 +153,12 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
                             horizontalOffset: 30.0,
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.easeIn,
-                              child:  Expanded(
-                            child:  expenseAndIncomeWidget(
-                              rotation: 1,
-                              type: 0,
-                              amount: totalExpense,
-                              label: "Total Expense"
-                            )    
-                                                    ),
+                              child:  expenseAndIncomeWidget(
+                                rotation: 1,
+                                type: 0,
+                                amount: totalExpense,
+                                label: "Total Expense"
+                              ),
                             ),
                           ),)               
                     ],

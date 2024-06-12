@@ -1,6 +1,7 @@
 import 'package:expense_app/home.dart';
 import 'package:expense_app/utils/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class AddExpenseSuccessScreen extends StatelessWidget {
   const AddExpenseSuccessScreen({super.key});
@@ -10,17 +11,21 @@ class AddExpenseSuccessScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text("Success", style: TextStyle(color: white, fontSize: 16, fontWeight: FontWeight.bold),),
-        backgroundColor: primaryColor,),
+        title: const Text("Success", style: TextStyle(color: white, fontSize: 16, fontWeight: FontWeight.bold),),
+        backgroundColor: primaryColor,
+        ),
       body: SafeArea(
         child: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                child: const Text("Expense Added Successfully", style: TextStyle(color: black, fontWeight: FontWeight.normal, fontSize: 16)),
-              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                height: 100,
+                child: Lottie.asset('assets/success_animation.json')),
+                         const SizedBox(height: 20),
+              const Text("Expense Added Successfully", style: TextStyle(color: black, fontWeight: FontWeight.normal, fontSize: 16)),
               const SizedBox(height: 40),
                InkWell(
                  onTap: () {
