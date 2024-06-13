@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:expense_app/model/my_expense_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +11,8 @@ import 'add_expense_flow/add_expense_flow_screen.dart';
 import 'utils/colors.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final User? user;
+  const Home({super.key, this.user});
 
   @override
   State<Home> createState() => _HomeState();
@@ -48,13 +50,20 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: const Text(
-          "Expenso",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: white,
-          ),
+        title: Column(
+
+          children: [
+            const Text(
+              "Expenso",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: white,
+              ),
+            ),
+            Text('Welcome, ${widget.user?.displayName}!'),
+          ],
+
         ),
         actions: [
 
@@ -147,20 +156,21 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
                             ),
                           ),
                         ),
-                      AnimationConfiguration.synchronized(
-                          child: FadeInAnimation(
-                            child: SlideAnimation(
-                            horizontalOffset: 30.0,
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeIn,
-                              child:  expenseAndIncomeWidget(
-                                rotation: 1,
-                                type: 0,
-                                amount: totalExpense,
-                                label: "Total Expense"
+                        AnimationConfiguration.synchronized(
+                            child: FadeInAnimation(
+                              child: SlideAnimation(
+                              horizontalOffset: 30.0,
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeIn,
+                                child:  expenseAndIncomeWidget(
+                                  rotation: 1,
+                                  type: 0,
+                                  amount: totalExpense,
+                                  label: "Total Expense"
+                                ),
                               ),
                             ),
-                          ),)               
+                        ),
                     ],
                   ),
                 ),
