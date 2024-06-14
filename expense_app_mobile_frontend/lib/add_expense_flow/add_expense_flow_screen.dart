@@ -8,7 +8,7 @@ import '../common_widgets/textfield_widget.dart';
 import '../model/my_expense_model.dart';
 import '../services/add_flow_services.dart';
 import '../utils/colors.dart';
-import 'add_expense_button_widget.dart';
+import 'widgets/add_expense_button_widget.dart';
 
 class AddExpenseFlowScreen extends StatefulWidget {
   const AddExpenseFlowScreen({super.key});
@@ -36,6 +36,7 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
   String? selectedCategory;
   MyExpenseModel? expenseModel;
   late AddFlowServices addExpenseService;
+  DateTime? userSelectedDateAndTime;
 
   @override
   void initState() {
@@ -302,6 +303,29 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
               Expanded(
                 child: InkWell(
                   onTap: () {
+                    setState(() {
+                      part = 6;
+                    });
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: white,
+                      border: Border.all(color: primaryColor),
+                    ),
+                    child: const Text(
+                      "Skip",
+                      style: TextStyle(color: primaryColor),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: InkWell(
+                  onTap: () {
                     expenseModel =  addExpenseService.addExpense(
                       expenseType: selectedExpenseType ?? -1,
                       amount: amountController.text,
@@ -326,29 +350,6 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
                     child: const Text(
                       "Add",
                       style: TextStyle(color: white),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      part = 6;
-                    });
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: white,
-                      border: Border.all(color: primaryColor),
-                    ),
-                    child: const Text(
-                      "Skip",
-                      style: TextStyle(color: primaryColor),
                     ),
                   ),
                 ),
@@ -520,29 +521,7 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
         const SizedBox(height: 30),
         Row(
           children: [
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  setState(() {
-                    part = 4;
-                  });
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: primaryColor,
-                    border: Border.all(color: primaryColor),
-                  ),
-                  child: const Text(
-                    "Add",
-                    style: TextStyle(color: white),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
+
             Expanded(
               child: InkWell(
                 onTap: () {
@@ -565,6 +544,30 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
                 ),
               ),
             ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    part = 4;
+                  });
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: primaryColor,
+                    border: Border.all(color: primaryColor),
+                  ),
+                  child: const Text(
+                    "Add",
+                    style: TextStyle(color: white),
+                  ),
+                ),
+              ),
+            ),
+
           ],
         )
       ],
@@ -600,8 +603,6 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
       ],
     );
   }
-
-  DateTime? userSelectedDateAndTime;
 
   Widget nextButtonWidget() {
     return InkWell(

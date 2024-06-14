@@ -1,28 +1,28 @@
 import 'dart:convert';
 
 import 'package:expense_app/model/my_expense_model.dart';
+import 'package:expense_app/profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'add_expense_flow/add_expense_flow_screen.dart';
+import 'add_expense_flow/widgets/total_expense_income.dart';
 import 'utils/colors.dart';
 
 class Home extends StatefulWidget {
   final User? user;
   const Home({super.key, this.user});
-
   @override
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
+class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late AnimationController controller;
   int selectedStaticsType = 1; // 00 = day , 1 = month , 2 = year
-
-
 
   Future<List<MyExpenseModel>> _loadExpenses() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -40,69 +40,63 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
     }
   }
 
-@override
+  @override
   void initState() {
     super.initState();
     controller =  AnimationController(vsync: this);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: Column(
-
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              "Expenso",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: white,
+            Text('Hey, ${widget.user?.displayName ?? "User"}!'),
+            InkWell(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen(displayName: 'Tejas Gaikwad',),));
+              },
+              child: Container(
+                height: 30,
+                width: 30,
+                decoration:  BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: Image.network("https://st3.depositphotos.com/9998432/13335/v/450/depositphotos_133352010-stock-illustration-default-placeholder-man-and-woman.jpg")),
               ),
             ),
-            Text('Welcome, ${widget.user?.displayName}!'),
           ],
-
         ),
-        actions: [
-
-          InkWell(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(
-                builder: (context) {
-                  return const AddExpenseFlowScreen();
-                },
-              ));
-            },
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.add,
-                size: 25,
-                color: white,
-              ),
-            ),
-          ),
-          //  InkWell(
-          //   onTap: () async {
-          //    // TODO clear expense here
-          //    SharedPreferences prefs = await SharedPreferences.getInstance();
-          //    prefs.setStringList("my_expenses", []);
-          //   },
-          //   child: const Padding(
-          //     padding: EdgeInsets.all(8.0),
-          //     child: Icon(
-          //       Icons.delete,
-          //       size: 25,
-          //       color: white,
-          //     ),
-          //   ),
-          // ),
-        ],
       ),
-      body: 
-      
+      floatingActionButton: InkWell(
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const AddExpenseFlowScreen(),));
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.circular(50),
+          ),
+          child: const Wrap(
+            alignment: WrapAlignment.center,
+            children: [
+              SizedBox(width: 10),
+              Icon(Icons.add, color: white,),
+              SizedBox(width: 10),
+              Text("Add", style: TextStyle(color: white, fontSize: 18),),
+              SizedBox(width: 10),
+            ],
+          ),
+        ),
+      ),
+      body:
+
       FutureBuilder<List<MyExpenseModel>>(
         future: _loadExpenses(),
         builder: (context, snapshot) {
@@ -135,46 +129,10 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 15),
-                Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                         AnimationConfiguration.synchronized(
-                          child: FadeInAnimation(
-                            child: SlideAnimation(
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeIn,
-                            horizontalOffset: -30.0,
-                              child: expenseAndIncomeWidget(
-                                rotation: 3,
-                                type: 1,
-                                amount: totalIncome,
-                                label: "Total Income"
-                              ),
-                            ),
-                          ),
-                        ),
-                        AnimationConfiguration.synchronized(
-                            child: FadeInAnimation(
-                              child: SlideAnimation(
-                              horizontalOffset: 30.0,
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeIn,
-                                child:  expenseAndIncomeWidget(
-                                  rotation: 1,
-                                  type: 0,
-                                  amount: totalExpense,
-                                  label: "Total Expense"
-                                ),
-                              ),
-                            ),
-                        ),
-                    ],
-                  ),
+                TotalExpenseIncome(
+                  totalIncome: totalIncome,
+                  totalExpense: totalExpense,
                 ),
-
                 const SizedBox(height: 15),
                 // TODO create logical feature then comment out this
                 // Container(
@@ -202,13 +160,11 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
                 // ),
             
                 AnimationConfiguration.synchronized(
-                
                   child: ScaleAnimation(
                     scale: 1,   
                     curve: Curves.easeIn,
                     child: FadeInAnimation(
                       curve: Curves.easeIn,
-                    
                       child: SizedBox(
                       height: 250,
                       child: Center(
@@ -218,7 +174,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
                                     showAxisLine: true,
                                     ticksPosition: ElementsPosition.outside,
                                     labelsPosition: ElementsPosition.outside,
-                      
                                     startAngle: 0,
                                     endAngle: 330,
                                     useRangeColorForAxis: true,
@@ -228,17 +183,13 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
                                     maximum: totalIncome+totalExpense,
                                     axisLabelStyle: const GaugeTextStyle(fontWeight: FontWeight.w500),
                                     maximumLabels: 1,
-                                    majorTickStyle: const MajorTickStyle(
-                                      length: 0.15, lengthUnit: GaugeSizeUnit.factor, thickness: 1,),
+                                    majorTickStyle: const MajorTickStyle(length: 0.15, lengthUnit: GaugeSizeUnit.factor, thickness: 1),
                                     minorTicksPerInterval: 4,
-                                    minorTickStyle: const MinorTickStyle(
-                                        length: 0.04, lengthUnit: GaugeSizeUnit.factor, thickness: 1),
+                                    minorTickStyle: const MinorTickStyle(length: 0.04, lengthUnit: GaugeSizeUnit.factor, thickness: 1),
                                     canScaleToFit: true,
-                    
                                     ranges: <GaugeRange>[
                                       GaugeRange(
                                         startValue: 0,
-                                        
                                         endValue: totalExpense,
                                         color:  Colors.red,
                                         sizeUnit: GaugeSizeUnit.factor,
@@ -247,7 +198,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
                                         endWidth: 0.2,
                                       ),
                                       GaugeRange(
-                                       
                                         startValue: totalExpense,
                                         endValue: totalIncome+totalExpense,
                                         rangeOffset: 0.08,
@@ -255,12 +205,13 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
                                         color: Colors.green,
                                         startWidth:  0.2,// model.isWebFullView ? 0.2 : 0.05,
                                         endWidth: 0.2, //model.isWebFullView ? 0.2 : 0.25,
-                                        ),
-                                    ])
+                                      ),
+                                    ],
+                                )
                               ],
-                                        ),
+                           ),
+                        ),
                       ),
-                    ),
                     ),
                   ),
                 ),
@@ -361,7 +312,12 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
     );
   }
 
-  Widget expenseAndIncomeWidget( {required String label, required double amount, required int type, required int rotation}) {
+  Widget expenseAndIncomeWidget({
+    required String label,
+    required double amount,
+    required int type,
+    required int rotation,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
@@ -391,4 +347,5 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin{
                                                                         );
                    
   }
+
 }

@@ -5,8 +5,8 @@ import 'package:expense_app/model/my_expense_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../utils/colors.dart';
-import 'add_expense_success_screen.dart';
+import '../../utils/colors.dart';
+import '../add_expense_success_screen.dart';
 
 class AddExpenseButtonWidget extends StatefulWidget {
   final MyExpenseModel? expenseSummary;
