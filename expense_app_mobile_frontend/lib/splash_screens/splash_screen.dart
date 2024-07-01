@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import '../auth/auth_screen.dart';
 import '../utils/colors.dart';
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+class SplashScreens extends StatefulWidget {
+  const SplashScreens({super.key});
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreens> createState() => _SplashScreensState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreensState extends State<SplashScreens> {
   PageController _pageController = PageController();
   int _currentPage = 0;
 

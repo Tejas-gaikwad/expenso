@@ -1,4 +1,5 @@
 import 'package:expense_app/home.dart';
+import 'package:expense_app/splash_screen.dart';
 import 'package:expense_app/splash_screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Home(),
+      home: SplashScreen(),
+      // AuthScreen(),
+      // Home(),
       // SplashScreen(),
       // const AuthScreen(),
     );

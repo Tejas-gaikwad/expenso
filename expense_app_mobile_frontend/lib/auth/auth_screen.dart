@@ -3,6 +3,9 @@ import 'package:expense_app/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../config/shared_prefs.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -21,6 +24,7 @@ class _AuthScreenState extends State<AuthScreen> {
       authLoading = true;
     });
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
@@ -28,9 +32,9 @@ class _AuthScreenState extends State<AuthScreen> {
         idToken: googleAuth.idToken,
       );
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
-
       final User? user = userCredential.user;
 
+      await prefs.setBool('isLoggedIn', true);
       return user;
     } catch(err){
       setState(() {
@@ -38,11 +42,12 @@ class _AuthScreenState extends State<AuthScreen> {
       });
       print("err ---  $err");
     }
-
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    print("auth screen ---   ");
     return Scaffold(
       backgroundColor: primaryColor,
       body: SafeArea(
@@ -87,6 +92,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 ),
               ),
+
+
             ],
           ),
         ),
