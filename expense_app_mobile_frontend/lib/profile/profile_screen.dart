@@ -1,4 +1,8 @@
+import 'package:expense_app/auth/bloc/authentication_bloc.dart';
+import 'package:expense_app/core/di/app_dependency_injection.dart';
+import 'package:expense_app/profile/widgets/logout_button_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../utils/colors.dart';
 
@@ -11,7 +15,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
+  final AuthenticationBloc authBloc = AppDependencyInjection.getIt.get();
   bool darkMode = false;
   @override
   Widget build(BuildContext context) {
@@ -45,37 +49,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
 
       body:  SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  const SizedBox(height: 15),
-                  profileCard(),
-                  const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 15),
-                      child: Divider()),
-                  const SizedBox(height: 15),
-                  
-              
-                ],
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                //TODO add logout logic here...
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-                width: double.infinity,
+        child: BlocConsumer(
+          bloc: authBloc,
+          builder: (context, state) {
+          return Column(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 15),
+                    profileCard(),
+                    const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 15),
+                        child: Divider()),
+                    const SizedBox(height: 15),
 
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                decoration: BoxDecoration(color: Colors.red,  borderRadius: BorderRadius.circular(8),),
-                child: const Text("Log Out", textAlign: TextAlign.center, style: TextStyle( color: white, fontWeight: FontWeight.bold,fontSize: 14),),
+
+                  ],
+                ),
               ),
-            )
-          ],
-        ),
+              const LogoutButtonWidget(),
+            ],
+          );
+        }, listener: (context, state) {
+
+        },)
       ),
     );
   }
