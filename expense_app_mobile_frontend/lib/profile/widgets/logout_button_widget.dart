@@ -15,13 +15,13 @@ class LogoutButtonWidget extends StatelessWidget {
     return  BlocConsumer(
       bloc: authBloc,
       builder: (context, state) {
-      return InkWell(
+      return GestureDetector(
         onTap: () {
 
           authBloc.add(const LogoutUserEvent());
         },
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 15,),
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(color: Colors.red,  borderRadius: BorderRadius.circular(8),),

@@ -4,6 +4,7 @@ import 'package:expense_app/profile/widgets/logout_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../config/shared_prefs.dart';
 import '../utils/colors.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -17,6 +18,15 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final AuthenticationBloc authBloc = AppDependencyInjection.getIt.get();
   bool darkMode = false;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    final uid = SharedPreferencesManager.getUserId();
+    authBloc.add(GetUserInfoEvent(userId: uid));
+  }
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -29,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
         actions: [
-          InkWell(
+          GestureDetector(
             onTap: () {
               setState(() {
                 darkMode = !darkMode;
@@ -52,25 +62,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: BlocConsumer(
           bloc: authBloc,
           builder: (context, state) {
-          return Column(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 15),
-                    profileCard(),
-                    const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 15),
-                        child: Divider()),
-                    const SizedBox(height: 15),
 
-
-                  ],
-                ),
-              ),
-              const LogoutButtonWidget(),
-            ],
-          );
+            if(state is UserDataLoadingState) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if(state is UserDataLoadedState) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 15),
+                        profileCard(
+                          userName: state.userData.fullName,
+                          userEmail: state.userData.email,
+                        ),
+                        const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 15),
+                            child: Divider()),
+                        const SizedBox(height: 15),
+                      ],
+                    ),
+                  ),
+                  const LogoutButtonWidget(),
+                ],
+              );
+            }
+            return const SizedBox();
         }, listener: (context, state) {
 
         },)
@@ -78,7 +98,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget profileCard() {
+  Widget profileCard({
+    String? userName,
+    String? userEmail,
+}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
       child: Row(
@@ -98,18 +121,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(width: 40),
-          const Expanded(
+           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Tejas Gaikwad",
-                  style: TextStyle(fontSize: 16,),
+                  userName ?? "",
+                  style: const TextStyle(fontSize: 16, color: Colors.black),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Text(
-                  "Tejas Gaikwad",
-                  style: TextStyle(fontSize: 12,),
+                  userEmail ?? "",
+                  style: const TextStyle(fontSize: 12, color: Colors.black),
                 ),
               ],
             ),

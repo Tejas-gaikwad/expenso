@@ -98,20 +98,18 @@ class AuthService {
           data: {'error': e});
     }
   }
-
   Future<ApiResponse> getUserInformation({required  String userId}) async {
     try{
-
       final DocumentReference userIdCollection = FirebaseFirestore.instance.collection('users').doc(userId);
       final responseData = await userIdCollection.get();
       final data = responseData.data() ;
-      if(data == null) {
+      if(data == null || data == {}) {
         return ApiResponse(
             statusCode: '404', message: 'User not Available', data: {
           'error': 'User not Available'
         });
       }
-      return ApiResponse(statusCode: '200', message: 'Data stored successfully', data: data as Map<String, dynamic>);
+      return ApiResponse(statusCode: '200', message: 'Data stored successfully', data: data as Map<String, dynamic> );
     }
     catch(error){
       return ApiResponse(statusCode: '400', message: 'Error while Creating Society', data: {});

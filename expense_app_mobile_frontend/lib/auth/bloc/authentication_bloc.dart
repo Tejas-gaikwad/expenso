@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:expense_app/repository/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../config/shared_prefs.dart';
 import '../../core/logs/logger/app_logger.dart';
 import '../../model/user_model.dart';
 import '../../services/auth_services.dart';
@@ -19,12 +20,11 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
         emit(GoogleLoginLoadingState());
         final responseData = await authRepo.googleLogin();
         final userParsedData = UserDataModel.fromJson(responseData.data);
-
-
-
         if (responseData.statusCode == '202') {
+          await SharedPreferencesManager.setUserId(userParsedData.uid);
           emit(NewGoogleLoginSuccessfulState(userData: userParsedData));
         } else {
+          await SharedPreferencesManager.setUserId(userParsedData.uid);
           emit(GoogleLoginSuccessfulState(userData: userParsedData));
         }
       } catch (e) {
@@ -43,7 +43,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
         final userParsedData = UserDataModel.fromJson(responseData.data);
         emit(UserDataLoadedState(userData: userParsedData));
       } catch (e) {
-        print(" UserData getting  Error -->>    $e");
         emit(
             const UserLoginErrorState(errorMessage: "Authentication Error..."));
         return;
