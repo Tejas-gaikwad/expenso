@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
-import '../../utils/colors.dart';
+import '../../../core/utils/colors.dart';
 
 class TotalExpenseIncome extends StatelessWidget {
   final double totalIncome;
   final double totalExpense;
-  const TotalExpenseIncome({super.key, required this.totalIncome, required this.totalExpense});
+  const TotalExpenseIncome(
+      {super.key, required this.totalIncome, required this.totalExpense});
 
   @override
   Widget build(BuildContext context) {
-    return  Container(
+    return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
       child: Row(
@@ -26,8 +27,7 @@ class TotalExpenseIncome extends StatelessWidget {
                     rotation: 3,
                     type: 1,
                     amount: totalIncome,
-                    label: "Total Income"
-                ),
+                    label: "Total Income"),
               ),
             ),
           ),
@@ -37,12 +37,11 @@ class TotalExpenseIncome extends StatelessWidget {
                 horizontalOffset: 30.0,
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeIn,
-                child:  expenseAndIncomeWidget(
+                child: expenseAndIncomeWidget(
                     rotation: 1,
                     type: 0,
                     amount: totalExpense,
-                    label: "Total Expense"
-                ),
+                    label: "Total Expense"),
               ),
             ),
           ),
@@ -62,28 +61,30 @@ class TotalExpenseIncome extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(9),
-          decoration:  BoxDecoration(
-            color: type == 0 ? Colors.red :  Colors.green,
+          decoration: BoxDecoration(
+            color: type == 0 ? Colors.red : Colors.green,
             shape: BoxShape.circle,
           ),
-          child:  RotatedBox(
-              quarterTurns: rotation,
-              child: const Icon(Icons.arrow_back)),
+          child: RotatedBox(
+              quarterTurns: rotation, child: const Icon(Icons.arrow_back)),
         ),
         const SizedBox(width: 18),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontSize: 12),),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12),
+            ),
             const SizedBox(height: 2),
-
-            Text("₹${amount.toString()}", style: const TextStyle( fontWeight: FontWeight.bold, fontSize: 26, color: black),),
+            Text(
+              "₹${amount.toString()}",
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 26, color: black),
+            ),
           ],
         ),
-
-
       ],
     );
-
   }
 }

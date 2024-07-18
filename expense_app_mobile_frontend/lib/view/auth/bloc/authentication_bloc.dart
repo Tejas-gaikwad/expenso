@@ -2,19 +2,18 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:expense_app/repository/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../config/shared_prefs.dart';
-import '../../core/logs/logger/app_logger.dart';
-import '../../model/user_model.dart';
-import '../../services/auth_services.dart';
+import '../../../core/config/shared_prefs.dart';
+import '../../../core/logs/logger/app_logger.dart';
+import '../../../model/user_model.dart';
 part 'authentication_event.dart';
 part 'authentication_state.dart';
 
-class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
+class AuthenticationBloc
+    extends Bloc<AuthenticationEvent, AuthenticationState> {
   final AuthRepository authRepo;
   final AppLogger _appLogger;
-  AuthenticationBloc(this.authRepo, this._appLogger) : super(AuthenticationInitialState()) {
-
-
+  AuthenticationBloc(this.authRepo, this._appLogger)
+      : super(AuthenticationInitialState()) {
     on<GoogleLoginEvent>((event, emit) async {
       try {
         emit(GoogleLoginLoadingState());

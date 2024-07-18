@@ -1,7 +1,6 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/api_layer/clients/login_api_client.dart';
 import '../core/logs/logger/app_logger.dart';
 import '../model/api_response.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,8 +10,7 @@ import '../model/user_model.dart';
 
 class AuthService {
   final AppLogger appLogger;
-  final LoginApiClient? loginApiClient;
-  AuthService({required this.appLogger, this.loginApiClient});
+  AuthService({required this.appLogger});
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth auth = FirebaseAuth.instance;

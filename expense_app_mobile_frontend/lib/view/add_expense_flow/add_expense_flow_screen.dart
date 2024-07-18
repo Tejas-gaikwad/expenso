@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:simple_animations/simple_animations.dart';
 
-import '../common_widgets/calendar_widget.dart';
-import '../common_widgets/prev_widget.dart';
-import '../common_widgets/textfield_widget.dart';
-import '../model/my_expense_model.dart';
-import '../services/add_flow_services.dart';
-import '../utils/colors.dart';
+import '../../core/widgets/calendar_widget.dart';
+import '../../core/widgets/prev_widget.dart';
+import '../../core/widgets/textfield_widget.dart';
+import '../../model/my_expense_model.dart';
+import '../../services/add_flow_services.dart';
+import '../../core/utils/colors.dart';
 import 'widgets/add_expense_button_widget.dart';
 
 class AddExpenseFlowScreen extends StatefulWidget {
@@ -26,7 +26,7 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
             duration: const Duration(milliseconds: 750), curve: Curves.easeOut);
 
   late Animation<double> size;
-   int? selectedExpenseType;
+  int? selectedExpenseType;
   double amount = -1; // 0=expense 1=income 2 =loan/debit
   late TextEditingController amountController;
   late TextEditingController _noteController;
@@ -70,7 +70,6 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: white),
@@ -203,7 +202,14 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
         const SizedBox(height: 30),
 
         AddExpenseButtonWidget(
-          expenseSummary: expenseModel,
+          expenseSummary: MyExpenseModel(
+            type: selectedExpenseType ?? -1,
+            amount: double.parse(amountController.text),
+            accountType: selectAccountType,
+            category: selectedCategory,
+            dateTime: userSelectedDateAndTime,
+            note: _noteController.text,
+          ),
         ),
 
         // InkWell(
@@ -235,7 +241,12 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
   }
 
   String? selectAccountType;
-  List<String> accountList  =["UPI", "Cards", "Cash", "NetBanking", ];
+  List<String> accountList = [
+    "UPI",
+    "Cards",
+    "Cash",
+    "NetBanking",
+  ];
 
   Widget selectExpenseWay() {
     return Container(
@@ -282,14 +293,20 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: selectAccountType != accountList[index] ? Colors.grey : white,
+                        color: selectAccountType != accountList[index]
+                            ? Colors.grey
+                            : white,
                       ),
-                      color: selectAccountType == accountList[index] ? primaryColor : white,
+                      color: selectAccountType == accountList[index]
+                          ? primaryColor
+                          : white,
                     ),
                     child: Text(
                       accountList[index],
                       style: TextStyle(
-                        color: selectAccountType == accountList[index] ? white : black,
+                        color: selectAccountType == accountList[index]
+                            ? white
+                            : black,
                       ),
                     ),
                   ),
@@ -326,15 +343,16 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
               Expanded(
                 child: InkWell(
                   onTap: () {
-                    expenseModel =  addExpenseService.addExpense(
+                    expenseModel = addExpenseService.addExpense(
                       expenseType: selectedExpenseType ?? -1,
                       amount: amountController.text,
                       accountType: selectAccountType,
                       category: selectedCategory,
                       dateTime: userSelectedDateAndTime,
                       note: _noteController.text,
-
                     );
+                    print(
+                        "expenseModel          -----------    ${expenseModel?.toJson()}");
                     setState(() {
                       part = 6;
                     });
@@ -361,36 +379,35 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
     );
   }
 
-    final  List<String> expenseCategories = [
-  'Groceries',
-  'Restaurants',
-  'Fuel',
-  'Public Transport',
-  'Rent/Mortgage',
-  'Utilities',
-  'Internet',
-  'Medical Bills',
-  'Pharmacy',
-  'Gym/Fitness',
-  'Movies',
-  'Concerts',
-  'Subscriptions',
-  'Clothing',
-  'Haircuts/Salons',
-  'Books',
-  'Tuition Fees',
-  'Flights',
-  'Hotels',
-  'Investments',
-  'Savings',
-  'Gifts',
-  'Charitable Donations',
-  'Childcare',
-  'Pet Care',
-  'Other/Uncategorized',
-  'Fees & Charges',
-];
-
+  final List<String> expenseCategories = [
+    'Groceries',
+    'Restaurants',
+    'Fuel',
+    'Public Transport',
+    'Rent/Mortgage',
+    'Utilities',
+    'Internet',
+    'Medical Bills',
+    'Pharmacy',
+    'Gym/Fitness',
+    'Movies',
+    'Concerts',
+    'Subscriptions',
+    'Clothing',
+    'Haircuts/Salons',
+    'Books',
+    'Tuition Fees',
+    'Flights',
+    'Hotels',
+    'Investments',
+    'Savings',
+    'Gifts',
+    'Charitable Donations',
+    'Childcare',
+    'Pet Care',
+    'Other/Uncategorized',
+    'Fees & Charges',
+  ];
 
   Widget addCategory() {
     return Container(
@@ -438,14 +455,20 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: selectedCategory == expenseCategories[index] ? Colors.grey : white,
+                        color: selectedCategory == expenseCategories[index]
+                            ? Colors.grey
+                            : white,
                       ),
-                      color:selectedCategory == expenseCategories[index]  ? primaryColor : white,
+                      color: selectedCategory == expenseCategories[index]
+                          ? primaryColor
+                          : white,
                     ),
                     child: Text(
                       expenseCategories[index],
                       style: TextStyle(
-                        color:selectedCategory == expenseCategories[index]  ? white : black,
+                        color: selectedCategory == expenseCategories[index]
+                            ? white
+                            : black,
                       ),
                     ),
                   ),
@@ -521,7 +544,6 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
         const SizedBox(height: 30),
         Row(
           children: [
-
             Expanded(
               child: InkWell(
                 onTap: () {
@@ -567,7 +589,6 @@ class _AddExpenseFlowScreenState extends State<AddExpenseFlowScreen>
                 ),
               ),
             ),
-
           ],
         )
       ],
