@@ -27,8 +27,6 @@ class _HomeScreenAppBarState extends State<HomeScreenAppBar> {
       bloc: authBloc,
       builder: (context, state) {
         if (state is UserDataLoadedState) {
-          print(
-              "state.userData.fullName      ------------       ${state.userData.fullName}");
           return appBarWidget(
             context: context,
             userName: state.userData.fullName,

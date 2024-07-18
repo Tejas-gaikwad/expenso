@@ -15,10 +15,9 @@ class AddExpenseEvent extends ExpenseEvent {
   List<Object> get props => [];
 }
 
-
 class GetAllExpenseEvent extends ExpenseEvent {
-  const GetAllExpenseEvent();
+  final String? filterType;
+  const GetAllExpenseEvent({this.filterType});
   @override
   List<Object> get props => [];
 }
-

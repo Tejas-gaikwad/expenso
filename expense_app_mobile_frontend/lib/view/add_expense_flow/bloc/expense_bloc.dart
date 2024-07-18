@@ -33,7 +33,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       try {
         emit(GetAllExpenseLoadingState());
 
-        final res = await expenseRepo.getExpenses();
+        final res = await expenseRepo.getExpenses(filterType: event.filterType);
         if (res.isNotEmpty) {
           emit(GetAllExpenseSuccessState(list: res));
         } else {

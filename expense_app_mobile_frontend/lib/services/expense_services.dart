@@ -27,7 +27,9 @@ class ExpenseService {
     }
   }
 
-  Future<List<MyExpenseModel>> getExpenses() async {
+  Future<List<MyExpenseModel>> getExpenses({
+    String? filterType,
+  }) async {
     List<MyExpenseModel> expenses = [];
     final uid = SharedPreferencesManager.getUserId();
 
@@ -36,6 +38,17 @@ class ExpenseService {
           .collection('users')
           .doc(uid)
           .collection('expenses')
+          .where('dateTime',
+              isGreaterThan: filterType == "day"
+                  ? DateTime.now()
+                  : filterType == "month"
+                      ? DateTime(DateTime.now().year, DateTime.now().month - 1,
+                          DateTime.now().day)
+                      : filterType == "year"
+                          ? DateTime(DateTime.now().year - 1,
+                              DateTime.now().month, DateTime.now().day)
+                          : DateTime.now())
+          .where('timestamp', isLessThan: DateTime.now())
           .get();
 
       for (var doc in expenseIdSnapshot.docs) {

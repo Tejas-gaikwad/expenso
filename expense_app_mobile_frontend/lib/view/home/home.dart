@@ -1,15 +1,13 @@
-import 'dart:convert';
-
 import 'package:expense_app/core/di/app_dependency_injection.dart';
-import 'package:expense_app/model/my_expense_model.dart';
-import 'package:expense_app/view/profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import '../../model/my_expense_model.dart';
 import '../add_expense_flow/add_expense_flow_screen.dart';
 import '../add_expense_flow/bloc/expense_bloc.dart';
 import '../add_expense_flow/widgets/total_expense_income.dart';
@@ -37,7 +35,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    print("widget.user    ------    ${widget.user}");
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -88,9 +85,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               double totalExpense = 0.0;
               double totalIncome = 0.0;
 
-              if ((state.list).isNotEmpty) {
-                for (int i = 0; i <= state.list.length - 1; i++) {
-                  final expense = state.list[i];
+              final list = state.list;
+
+              if ((list).isNotEmpty) {
+                for (int i = 0; i <= list.length - 1; i++) {
+                  final expense = list[i];
                   final amount = expense.amount ?? 0.0;
                   if (expense.type == 0) {
                     totalExpense = (amount + totalExpense);
@@ -100,241 +99,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 }
               }
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 15),
-                  TotalExpenseIncome(
-                    totalIncome: totalIncome,
-                    totalExpense: totalExpense,
-                  ),
-                  const SizedBox(height: 15),
-                  // TODO create logical feature then comment out this
-                  Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        statisticsTypeWidget(
-                            onTap: () {
-                              setState(() {
-                                selectedStaticsType = 0;
-                              });
-                            },
-                            selected: selectedStaticsType == 0 ? true : false,
-                            label: 'Day'),
-                        statisticsTypeWidget(
-                            onTap: () {
-                              setState(() {
-                                selectedStaticsType = 1;
-                              });
-                            },
-                            selected: selectedStaticsType == 1 ? true : false,
-                            label: 'Month'),
-                        statisticsTypeWidget(
-                            onTap: () {
-                              setState(() {
-                                selectedStaticsType = 2;
-                              });
-                            },
-                            selected: selectedStaticsType == 2 ? true : false,
-                            label: 'Year'),
-                      ],
-                    ),
-                  ),
-
-                  AnimationConfiguration.synchronized(
-                    child: ScaleAnimation(
-                      scale: 1,
-                      curve: Curves.easeIn,
-                      child: FadeInAnimation(
-                        curve: Curves.easeIn,
-                        child: SizedBox(
-                          height: 250,
-                          child: Center(
-                            child: SfRadialGauge(
-                              axes: <RadialAxis>[
-                                RadialAxis(
-                                  showAxisLine: true,
-                                  ticksPosition: ElementsPosition.outside,
-                                  labelsPosition: ElementsPosition.outside,
-                                  startAngle: 0,
-                                  endAngle: 330,
-                                  useRangeColorForAxis: true,
-                                  showFirstLabel: true,
-                                  showLastLabel: true,
-                                  isInversed: false,
-                                  maximum: totalIncome + totalExpense,
-                                  axisLabelStyle: const GaugeTextStyle(
-                                      fontWeight: FontWeight.w500),
-                                  maximumLabels: 1,
-                                  majorTickStyle: const MajorTickStyle(
-                                      length: 0.15,
-                                      lengthUnit: GaugeSizeUnit.factor,
-                                      thickness: 1),
-                                  minorTicksPerInterval: 4,
-                                  minorTickStyle: const MinorTickStyle(
-                                      length: 0.04,
-                                      lengthUnit: GaugeSizeUnit.factor,
-                                      thickness: 1),
-                                  canScaleToFit: true,
-                                  ranges: <GaugeRange>[
-                                    GaugeRange(
-                                      startValue: 0,
-                                      endValue: totalExpense,
-                                      color: Colors.red,
-                                      sizeUnit: GaugeSizeUnit.factor,
-                                      rangeOffset: 0.04,
-                                      startWidth: 0.2,
-                                      endWidth: 0.2,
-                                    ),
-                                    GaugeRange(
-                                      startValue: totalExpense,
-                                      endValue: totalIncome + totalExpense,
-                                      rangeOffset: 0.08,
-                                      sizeUnit: GaugeSizeUnit.factor,
-                                      color: Colors.green,
-                                      startWidth:
-                                          0.2, // model.isWebFullView ? 0.2 : 0.05,
-                                      endWidth:
-                                          0.2, //model.isWebFullView ? 0.2 : 0.25,
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "My Expenses",
-                          style: TextStyle(
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          "See all",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: primaryColor,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  ((state.list).isEmpty)
-                      ? const SizedBox(
-                          height: 400,
-                          width: double.infinity,
-                          child: Text("No Transactions Available"),
-                        )
-                      : AnimationLimiter(
-                          child: Expanded(
-                            child: ListView.builder(
-                              itemCount: (state.list.length < 3)
-                                  ? state.list.length
-                                  : 3,
-                              itemBuilder: (context, index) {
-                                final expense = state.list[index];
-
-                                return AnimationConfiguration.staggeredList(
-                                  position: index,
-                                  duration: const Duration(milliseconds: 375),
-                                  child: SlideAnimation(
-                                    verticalOffset: 50.0,
-                                    child: FadeInAnimation(
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 15, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: containerColor,
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 10),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(10),
-                                              child: const Icon(
-                                                Icons.category_outlined,
-                                                color: Colors.black,
-                                                size: 30,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    expense.category ??
-                                                        "Unknown",
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 14,
-                                                    ),
-                                                    maxLines: 1,
-                                                  ),
-                                                  expense.dateTime == null
-                                                      ? const Text("")
-                                                      : Text(
-                                                          DateFormat("MMM yyyy")
-                                                              .format(expense
-                                                                      .dateTime ??
-                                                                  DateTime
-                                                                      .now()),
-                                                          style: const TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .normal,
-                                                              fontSize: 12,
-                                                              color: Colors
-                                                                  .black54),
-                                                          maxLines: 1,
-                                                        ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              "₹${expense.amount.toString()}",
-                                              style: TextStyle(
-                                                  color: expense.type == 0
-                                                      ? Colors.red
-                                                      : expense.type == 1
-                                                          ? Colors.green
-                                                          : Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        )
-                ],
-              );
+              return mainScreen();
             }
-            return const SizedBox();
+            return mainScreen();
           },
           listener: (context, state) {
             if (state is GetAllExpenseErrorState) {
@@ -343,6 +110,245 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             }
           },
         ));
+  }
+
+  Widget mainScreen({
+    double? totalExpense,
+    double? totalIncome,
+    List<MyExpenseModel>? list,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        const SizedBox(height: 15),
+        TotalExpenseIncome(
+          totalIncome: totalIncome ?? 0.0,
+          totalExpense: totalExpense ?? 0.0,
+        ),
+        const SizedBox(height: 15),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            statisticsTypeWidget(
+                onTap: () {
+                  setState(() {
+                    selectedStaticsType = 0;
+                  });
+                  expenseBloc.add(const GetAllExpenseEvent(filterType: "day"));
+                },
+                selected: selectedStaticsType == 0 ? true : false,
+                label: 'Day'),
+            statisticsTypeWidget(
+                onTap: () {
+                  setState(() {
+                    selectedStaticsType = 1;
+                  });
+                  expenseBloc
+                      .add(const GetAllExpenseEvent(filterType: "month"));
+                },
+                selected: selectedStaticsType == 1 ? true : false,
+                label: 'Month'),
+            statisticsTypeWidget(
+                onTap: () {
+                  setState(() {
+                    selectedStaticsType = 2;
+                  });
+                  expenseBloc.add(const GetAllExpenseEvent(filterType: "year"));
+                },
+                selected: selectedStaticsType == 2 ? true : false,
+                label: 'Year'),
+          ],
+        ),
+        (list ?? []).isEmpty
+            ? const SizedBox(height: 30)
+            : AnimationConfiguration.synchronized(
+                child: ScaleAnimation(
+                  scale: 1,
+                  curve: Curves.easeIn,
+                  child: FadeInAnimation(
+                    curve: Curves.easeIn,
+                    child: SizedBox(
+                      height: 250,
+                      child: Center(
+                        child: SfRadialGauge(
+                          axes: <RadialAxis>[
+                            RadialAxis(
+                              showAxisLine: true,
+                              ticksPosition: ElementsPosition.outside,
+                              labelsPosition: ElementsPosition.outside,
+                              startAngle: 0,
+                              endAngle: 330,
+                              useRangeColorForAxis: true,
+                              showFirstLabel: true,
+                              showLastLabel: true,
+                              isInversed: false,
+                              maximum:
+                                  (totalIncome ?? 0.0) + (totalExpense ?? 0.0),
+                              axisLabelStyle: const GaugeTextStyle(
+                                  fontWeight: FontWeight.w500),
+                              maximumLabels: 1,
+                              majorTickStyle: const MajorTickStyle(
+                                  length: 0.15,
+                                  lengthUnit: GaugeSizeUnit.factor,
+                                  thickness: 1),
+                              minorTicksPerInterval: 4,
+                              minorTickStyle: const MinorTickStyle(
+                                  length: 0.04,
+                                  lengthUnit: GaugeSizeUnit.factor,
+                                  thickness: 1),
+                              canScaleToFit: true,
+                              ranges: <GaugeRange>[
+                                GaugeRange(
+                                  startValue: 0,
+                                  endValue: (totalExpense ?? 0.0),
+                                  color: Colors.red,
+                                  sizeUnit: GaugeSizeUnit.factor,
+                                  rangeOffset: 0.04,
+                                  startWidth: 0.2,
+                                  endWidth: 0.2,
+                                ),
+                                GaugeRange(
+                                  startValue: (totalExpense ?? 0.0),
+                                  endValue: (totalIncome ?? 0.0) +
+                                      (totalExpense ?? 0.0),
+                                  rangeOffset: 0.08,
+                                  sizeUnit: GaugeSizeUnit.factor,
+                                  color: Colors.green,
+                                  startWidth:
+                                      0.2, // model.isWebFullView ? 0.2 : 0.05,
+                                  endWidth:
+                                      0.2, //model.isWebFullView ? 0.2 : 0.25,
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "My Expenses",
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                "See all",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: primaryColor,
+                ),
+              )
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        ((list ?? []).isEmpty)
+            ? Center(
+                child: Container(
+                  alignment: Alignment.center,
+                  height: MediaQuery.of(context).size.height / 4,
+                  width: double.infinity,
+                  child: const Text(
+                    "No Transactions Available",
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+              )
+            : AnimationLimiter(
+                child: Expanded(
+                  child: ListView.builder(
+                    itemCount: ((list ?? []).length < 3) ? list?.length : 3,
+                    itemBuilder: (context, index) {
+                      final expense = list?[index];
+
+                      return AnimationConfiguration.staggeredList(
+                        position: index,
+                        duration: const Duration(milliseconds: 375),
+                        child: SlideAnimation(
+                          verticalOffset: 50.0,
+                          child: FadeInAnimation(
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: containerColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    child: const Icon(
+                                      Icons.category_outlined,
+                                      color: Colors.black,
+                                      size: 30,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          expense?.category ?? "Unknown",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 1,
+                                        ),
+                                        expense?.dateTime == null
+                                            ? const Text("")
+                                            : Text(
+                                                DateFormat("MMM yyyy").format(
+                                                    expense?.dateTime ??
+                                                        DateTime.now()),
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.normal,
+                                                    fontSize: 12,
+                                                    color: Colors.black54),
+                                                maxLines: 1,
+                                              ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    "₹${expense?.amount.toString()}",
+                                    style: TextStyle(
+                                        color: expense?.type == 0
+                                            ? Colors.red
+                                            : expense?.type == 1
+                                                ? Colors.green
+                                                : Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              )
+      ],
+    );
   }
 
   Widget statisticsTypeWidget(
