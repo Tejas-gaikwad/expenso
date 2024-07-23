@@ -12,6 +12,7 @@ import '../add_expense_flow/add_expense_flow_screen.dart';
 import '../add_expense_flow/bloc/expense_bloc.dart';
 import '../add_expense_flow/widgets/total_expense_income.dart';
 import '../../core/utils/colors.dart';
+import '../all_expenses_screen/all_expenses_screen.dart';
 import 'widgets/homescreen_appbar.dart';
 
 class Home extends StatefulWidget {
@@ -99,7 +100,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 }
               }
 
-              return mainScreen();
+              return mainScreen(
+                list: list,
+                totalExpense: totalExpense,
+                totalIncome: totalIncome,
+              );
             }
             return mainScreen();
           },
@@ -135,20 +140,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   setState(() {
                     selectedStaticsType = 0;
                   });
-                  expenseBloc.add(const GetAllExpenseEvent(filterType: "day"));
+                  expenseBloc
+                      .add(const GetAllExpenseEvent(filterType: "month"));
                 },
                 selected: selectedStaticsType == 0 ? true : false,
-                label: 'Day'),
+                label: 'Month'),
             statisticsTypeWidget(
                 onTap: () {
                   setState(() {
                     selectedStaticsType = 1;
                   });
-                  expenseBloc
-                      .add(const GetAllExpenseEvent(filterType: "month"));
+                  expenseBloc.add(const GetAllExpenseEvent(filterType: "day"));
                 },
                 selected: selectedStaticsType == 1 ? true : false,
-                label: 'Month'),
+                label: 'Day'),
             statisticsTypeWidget(
                 onTap: () {
                   setState(() {
@@ -229,22 +234,31 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   ),
                 ),
               ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 "My Expenses",
                 style: TextStyle(
                   fontSize: 16,
                 ),
               ),
-              Text(
-                "See all",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: primaryColor,
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AllExpensesScreen(),
+                      ));
+                },
+                child: const Text(
+                  "See all",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: primaryColor,
+                  ),
                 ),
               )
             ],
@@ -269,7 +283,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     itemCount: ((list ?? []).length < 3) ? list?.length : 3,
                     itemBuilder: (context, index) {
                       final expense = list?[index];
-
                       return AnimationConfiguration.staggeredList(
                         position: index,
                         duration: const Duration(milliseconds: 375),

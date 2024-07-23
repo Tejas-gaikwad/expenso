@@ -37,7 +37,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         if (res.isNotEmpty) {
           emit(GetAllExpenseSuccessState(list: res));
         } else {
-          emit(const GetAllExpenseErrorState());
+          emit(const GetAllExpenseSuccessState(list: []));
         }
       } catch (e) {
         print(" GetAllExpenseErrorState Error -->>    $e");

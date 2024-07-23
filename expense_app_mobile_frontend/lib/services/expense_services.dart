@@ -27,54 +27,65 @@ class ExpenseService {
     }
   }
 
+  DateTime getFilterDateTime(String? filterType) {
+    if (filterType == "day") {
+      return DateTime.now();
+    } else if (filterType == "month") {
+      return DateTime(
+          DateTime.now().year, DateTime.now().month - 1, DateTime.now().day);
+    } else if (filterType == "year") {
+      return DateTime(
+          DateTime.now().year - 1, DateTime.now().month, DateTime.now().day);
+    } else {
+      return DateTime.now();
+    }
+  }
+
   Future<List<MyExpenseModel>> getExpenses({
     String? filterType,
   }) async {
     List<MyExpenseModel> expenses = [];
     final uid = SharedPreferencesManager.getUserId();
-
     try {
       QuerySnapshot expenseIdSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
           .collection('expenses')
-          .where('dateTime',
-              isGreaterThan: filterType == "day"
-                  ? DateTime.now()
-                  : filterType == "month"
-                      ? DateTime(DateTime.now().year, DateTime.now().month - 1,
-                          DateTime.now().day)
-                      : filterType == "year"
-                          ? DateTime(DateTime.now().year - 1,
-                              DateTime.now().month, DateTime.now().day)
-                          : DateTime.now())
-          .where('timestamp', isLessThan: DateTime.now())
           .get();
+
+      print(
+          "expenseIdSnapshot.docs     -----------       ${expenseIdSnapshot.docs}");
 
       for (var doc in expenseIdSnapshot.docs) {
         String expenseId = doc.id;
-
-        // Fetch the expense details from the expenses collection
+        print('expenseId -----------     ${expenseId}');
         DocumentSnapshot expenseSnapshot = await FirebaseFirestore.instance
             .collection('expenses')
             .doc(expenseId)
             .get();
 
-        print("expenseSnapshot     -----------       $expenseSnapshot");
-
         if (expenseSnapshot.exists) {
           final data = expenseSnapshot.data();
-
-          print("data     -----------       $data");
-
           final myExpense =
               MyExpenseModel.fromJson(data as Map<String, dynamic>);
 
-          print("myExpense     -----------       $myExpense");
+          final expenseDate = myExpense.dateTime;
+          final filterDateTime = getFilterDateTime(filterType);
+          print('filterType -----------     ${filterType}');
 
-          expenses.add(myExpense);
+          if (filterType == null) {
+            expenses.add(myExpense);
+          } else {
+            print('ilterType != "" -----------     ${myExpense.toJson()}');
+            if (expenseDate!.isAfter(filterDateTime) &&
+                expenseDate.isBefore(DateTime.now())) {
+              expenses.add(myExpense);
+            }
+          }
+          print('expenses -----------     ${expenses}');
         }
       }
+      return expenses;
     } catch (e) {
       print('Error fetching expenses: $e');
     }
